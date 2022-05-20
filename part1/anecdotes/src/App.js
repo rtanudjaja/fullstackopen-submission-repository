@@ -1,5 +1,9 @@
 import { useState } from 'react'
 
+function getRandom(max) {
+  return Math.floor(Math.random() * max);
+}
+
 const App = () => {
   const anecdotes = [
     'If it hurts, do it more often',
@@ -12,10 +16,33 @@ const App = () => {
   ]
    
   const [selected, setSelected] = useState(0)
+  const [points, setPoints] = useState(anecdotes.reduce((acc, n, i) => {
+    acc[i] = 0
+    return acc
+  }, {}))
+  const mostPopularAnecdotes = Object.keys(points).reduce((acc, n) => {
+    return points[acc] < points[n] ? n : acc
+  }, 0)
 
   return (
     <div>
-      {anecdotes[selected]}
+      <h1>Anecdote of the day</h1>
+      {anecdotes[selected]}<br />
+      has {points[selected]} votes<br />
+      <button onClick={() => setPoints({
+        ...points,
+        [selected]: points[selected] + 1
+      })}>
+        vote
+      </button>&nbsp;
+      <button onClick={() => setSelected(
+        getRandom(anecdotes.length)
+      )}>
+        next anecdotes
+      </button>
+      <h1>Anecdote with most votes</h1>
+      {anecdotes[mostPopularAnecdotes]}<br />
+      has {points[mostPopularAnecdotes]} votes<br />
     </div>
   )
 }
