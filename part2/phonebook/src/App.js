@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import Notification from "./components/Notification";
 import phonebookService from "./services/phonebook";
 
 const App = () => {
@@ -9,6 +10,8 @@ const App = () => {
   const [newFilter, setNewFilter] = useState("");
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     phonebookService.getAll().then((data) => {
@@ -40,14 +43,40 @@ const App = () => {
         )
       ) {
         personObject.id = person.id;
-        phonebookService.update(person.id, personObject).then((data) => {
-          const previousPersonsList = persons.filter((n) => n.id !== person.id);
-          setPersons([...previousPersonsList, data]);
-        });
+        phonebookService
+          .update(person.id, personObject)
+          .then((data) => {
+            const previousPersonsList = persons.filter(
+              (n) => n.id !== person.id
+            );
+            setPersons([...previousPersonsList, data]);
+
+            setSuccessMessage(`${newName}'s number updated`);
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 5000);
+          })
+          .catch(() => {
+            setErrorMessage(
+              `Information of '${newName}' has already been removed from the server`
+            );
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 5000);
+            const previousPersonsList = persons.filter(
+              (n) => n.id !== person.id
+            );
+            setPersons([...previousPersonsList]);
+          });
       }
     } else {
       phonebookService.create(personObject).then((data) => {
         setPersons([...persons, data]);
+
+        setSuccessMessage(`${newName} added`);
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 5000);
       });
     }
     setNewName("");
@@ -57,6 +86,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={errorMessage} msgStyle={"error"} />
+      <Notification message={successMessage} msgStyle={"success"} />
       <Filter newFilter={newFilter} handleFilterChange={handleFilterChange} />
       <h2>add a new</h2>
       <PersonForm
@@ -75,6 +106,7 @@ const App = () => {
         persons={persons}
         setPersons={setPersons}
         newFilter={newFilter}
+        setErrorMessage={setErrorMessage}
       />
     </div>
   );
