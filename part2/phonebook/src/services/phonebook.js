@@ -21,4 +21,6 @@ const deleteEntry = (id) => {
   return request.then(response => response.data)
 }
 
-export default { getAll, create, update, deleteEntry }
+const phonebookService = { getAll, create, update, deleteEntry }
+
+export default phonebookService
