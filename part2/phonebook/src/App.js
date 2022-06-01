@@ -1,66 +1,84 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
-import Filter from './components/Filter'
-import PersonForm from './components/PersonForm'
-import Persons from './components/Persons'
+import { useState, useEffect } from "react";
+import axios from "axios";
+import Filter from "./components/Filter";
+import PersonForm from "./components/PersonForm";
+import Persons from "./components/Persons";
+import phonebookService from "./services/phonebook";
 
 const App = () => {
-  const [persons, setPersons] = useState([]) 
-  const [newFilter, setNewFilter] = useState('')
-  const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('')
+  const [persons, setPersons] = useState([]);
+  const [newFilter, setNewFilter] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newNumber, setNewNumber] = useState("");
 
   useEffect(() => {
-    axios
-    .get('http://localhost:3001/persons')
-    .then(response => {
-      setPersons(response.data)
-    })
-  }, [])
+    phonebookService.getAll().then((data) => {
+      setPersons(data);
+    });
+  }, []);
 
   const handleFilterChange = (e) => {
-    setNewFilter(e.target.value)
-  }
+    setNewFilter(e.target.value);
+  };
   const handleNameChange = (e) => {
-    setNewName(e.target.value)
-  }
+    setNewName(e.target.value);
+  };
   const handleNumberChange = (e) => {
-    setNewNumber(e.target.value)
-  }
+    setNewNumber(e.target.value);
+  };
 
   const handleAdd = (e) => {
-    e.preventDefault()
-    if(persons.findIndex(person => person.name === newName) > -1) {
-      alert(`${newName} is already added to phonebook`)
+    e.preventDefault();
+    const person = persons.find((person) => person.name === newName);
+    const personObject = {
+      name: newName,
+      number: newNumber,
+    };
+    if (person) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        personObject.id = person.id;
+        phonebookService.update(person.id, personObject).then((data) => {
+          const previousPersonsList = persons.filter((n) => n.id !== person.id);
+          setPersons([...previousPersonsList, data]);
+        });
+      }
     } else {
-      setPersons([...persons, {
-        name: newName,
-        number: newNumber
-      }])
+      phonebookService.create(personObject).then((data) => {
+        setPersons([...persons, data]);
+      });
     }
-    setNewName('')
-  }
+    setNewName("");
+    setNewNumber("");
+  };
 
   return (
     <div>
       <h2>Phonebook</h2>
       <Filter newFilter={newFilter} handleFilterChange={handleFilterChange} />
       <h2>add a new</h2>
-      <PersonForm 
+      <PersonForm
         data={{
           newName,
-          newNumber
+          newNumber,
         }}
         actions={{
           handleNameChange,
           handleNumberChange,
-          handleAdd
+          handleAdd,
         }}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} newFilter={newFilter} />
+      <Persons
+        persons={persons}
+        setPersons={setPersons}
+        newFilter={newFilter}
+      />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
