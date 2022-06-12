@@ -63,14 +63,14 @@ const App = () => {
               setErrorMessage(
                 `Information of '${newName}' has already been removed from the server`
               );
+              const previousPersonsList = persons.filter(
+                (n) => n.id !== person.id
+              );
+              setPersons([...previousPersonsList]);
             }
             setTimeout(() => {
               setErrorMessage(null);
             }, 5000);
-            const previousPersonsList = persons.filter(
-              (n) => n.id !== person.id
-            );
-            setPersons([...previousPersonsList]);
           });
       }
     } else {
