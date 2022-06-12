@@ -70,12 +70,18 @@ const App = () => {
           });
       }
     } else {
-      phonebookService.create(personObject).then((data) => {
-        setPersons([...persons, data]);
+      phonebookService.create(personObject).then((createdPerson ) => {
+        setPersons([...persons, createdPerson ]);
 
         setSuccessMessage(`${newName} added`);
         setTimeout(() => {
           setSuccessMessage(null);
+        }, 5000);
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data);
+        setTimeout(() => {
+          setErrorMessage(null);
         }, 5000);
       });
     }
