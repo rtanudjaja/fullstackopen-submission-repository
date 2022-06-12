@@ -56,10 +56,14 @@ const App = () => {
               setSuccessMessage(null);
             }, 5000);
           })
-          .catch(() => {
-            setErrorMessage(
-              `Information of '${newName}' has already been removed from the server`
-            );
+          .catch((error) => {
+            if (error.response.data.error) {
+              setErrorMessage(error.response.data.error);
+            } else {
+              setErrorMessage(
+                `Information of '${newName}' has already been removed from the server`
+              );
+            }
             setTimeout(() => {
               setErrorMessage(null);
             }, 5000);
@@ -70,20 +74,22 @@ const App = () => {
           });
       }
     } else {
-      phonebookService.create(personObject).then((createdPerson ) => {
-        setPersons([...persons, createdPerson ]);
+      phonebookService
+        .create(personObject)
+        .then((createdPerson) => {
+          setPersons([...persons, createdPerson]);
 
-        setSuccessMessage(`${newName} added`);
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 5000);
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data);
-        setTimeout(() => {
-          setErrorMessage(null);
-        }, 5000);
-      });
+          setSuccessMessage(`${newName} added`);
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 5000);
+        })
+        .catch((error) => {
+          setErrorMessage(error.response.data.error);
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 5000);
+        });
     }
     setNewName("");
     setNewNumber("");
